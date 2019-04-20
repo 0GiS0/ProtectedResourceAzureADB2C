@@ -17,6 +17,9 @@ namespace ProtectedResourceAzureADB2C
 {
     public class Startup
     {
+        public static string ScopeRead;
+        public static string ScopeWrite;
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -27,7 +30,7 @@ namespace ProtectedResourceAzureADB2C
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(AzureADB2CDefaults.JwtBearerAuthenticationScheme)
+            services.AddAuthentication(AzureADB2CDefaults.BearerAuthenticationScheme)
                 .AddAzureADB2CBearer(options => Configuration.Bind("AzureAdB2C", options));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
@@ -35,6 +38,9 @@ namespace ProtectedResourceAzureADB2C
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            ScopeRead = Configuration["AzureAdB2C:ScopeRead"];
+            ScopeWrite = Configuration["AzureAdB2C:ScopeWrite"];
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

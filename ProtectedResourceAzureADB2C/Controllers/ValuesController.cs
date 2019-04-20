@@ -12,11 +12,18 @@ namespace ProtectedResourceAzureADB2C.Controllers
     [ApiController]
     public class ValuesController : ControllerBase
     {
+        List<string> values = new List<string> { "value1", "value2" };
+
         // GET api/values
         [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
-            return new string[] { "value1", "value2" };
+            var scopes = HttpContext.User.FindFirst("http://schemas.microsoft.com/identity/claims/scope")?.Value;
+            if (!string.IsNullOrEmpty(Startup.ScopeRead) && scopes != null
+                    && scopes.Split(' ').Any(s => s.Equals(Startup.ScopeRead)))
+                return Ok(values);
+            else
+                return Unauthorized();
         }
 
         // GET api/values/5
@@ -28,8 +35,17 @@ namespace ProtectedResourceAzureADB2C.Controllers
 
         // POST api/values
         [HttpPost]
-        public void Post([FromBody] string value)
+        public IActionResult Post([FromBody] string value)
         {
+            var scopes = HttpContext.User.FindFirst("http://schemas.microsoft.com/identity/claims/scope")?.Value;
+            if (!string.IsNullOrEmpty(Startup.ScopeWrite) && scopes != null
+                    && scopes.Split(' ').Any(s => s.Equals(Startup.ScopeWrite)))
+            {
+                values.Add(value);
+                return Ok();
+            }
+            else
+                return Unauthorized();
         }
 
         // PUT api/values/5
